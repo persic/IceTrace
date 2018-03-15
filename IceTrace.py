@@ -406,9 +406,11 @@ def TraceRayToX(NvsZ,r0,v0,xf,rStep,ybot,ytop,Wiggle=False,WigSig=1.0):
     return xspace, yspace, TravelTime
 
 if __name__ == "__main__":
+    #This is just an example to show some features
     from timeit import default_timer as timer
 
-    print('Initializing...')
+    #First, trace some rays given initial conditions
+    print('Trace rays from initial contitions. Initializing...')
     startTime=timer()
 
     rStep = 0.05
@@ -458,4 +460,37 @@ if __name__ == "__main__":
     ax.set_ylim(top=50)
     endTime = timer()
     print('All Done in {}s'.format(endTime-startTime))
+    plt.show()
+    plt.close('all')
+
+    #Next, find solutions between two points
+    print('Find ray tracing solutions between points. Initializing...')
+    startTime=timer()
+
+    r1=[0,-75]
+    r2=[100,-10]
+
+    PathsX, PathsY, Times = FindRefractedPaths(N1,r1,r2,rStep,ybot,ytop)
+    endTime=timer()
+    timeElapsed=endTime-startTime
+    nSolutions=len(PathsX)
+    print("Found {} valid ray tracing solutions in {} seconds".format(nSolutions,timeElapsed))
+
+    fig2, ax2 = plt.subplots()
+    if nSolutions > 0:
+        for i in range(nSolutions):
+            print("Time for Solution {} = {} ns".format(i+1,Times[i]*1e9))
+            ax2.plot(PathsX[i],PathsY[i],linewidth=5,label="Solution {}: t={} ns".format(i+1,Times[i]*1e9))
+
+
+        ax2.set_xlabel("x (m)")
+        ax2.set_ylabel("y (m)")
+
+    ax2.scatter(*r1,marker='x',c='k',s=150,label="Start")
+    ax2.scatter(*r2,marker='x',c='r',s=150,label="End")
+    ax2.axhline(y=0,c='r',ls=':')
+    #ax2.axhline(y=ybot,c='k')
+    ax2.set_xlim([r1[0]-5,r2[0]+5])
+    #plt.ylim([r1[1]-5,r2[1]+5])
+    ax2.legend()
     plt.show()
